@@ -1,0 +1,50 @@
+###############################################################################################################################################
+# Beam model: GenericBeamModel (2023/01/27 12:45:20)
+# Fields no.: 2
+# Fields PB no.: [1132, 2073] (total: 3205)
+# Fields prim. no.: [26160048480.85, 27107593209.09] (total: 53267641689.94 ~= 5.327E+10)
+###############################################################################################################################################
+field: 1 ; O=[ +0.0000, -190.0000, +0.0000 ] ;   f=[ +0.000, +1.000, +0.000 ] ;   u=[ +0.000, +0.000, +1.000 ] ;   # Definition of field 1 (field name: 'Field 1')
+# field: 2 ; O=[ +0.0000, -190.0000, +0.0000 ] ;   f=[ +0.000, +1.000, +0.000 ] ;   u=[ +0.000, +0.000, +1.000 ] ;   # Definition of field 2 (field name: 'Field 2')
+pbmaster: 1 ; particle=proton ; Xsec=gauss ; columns=[P.x, P.y, P.z, v.x, v.y, v.z, Emean, Estdev, N, FWHM]
+# pbmaster: 2 ; particle=proton ; Xsec=emittance ; emittanceRefPlaneDistance=190.0000 ; columns=[P.x, P.y, P.z, v.x, v.y, v.z, Emean, Estdev, N, twissAlphaX, twissBetaX, emittanceX, twissAlphaY, twissBetaY, emittanceY]
+group: fieldGroup field_1 # field_2
+region: gantry ; O = [0,0,0] ; L = [1,1,1] ; lAdaptiveSize=t ; material = vacuum
+set_parent: gantry fieldGroup # nozzleGroup
+save_regions: 0
+##################################################
+###### Start of setup and delivery sequence ######
+##################################################
+###### setup sequence for field 1 (field name: 'Field 1')
+# translate nozzle regions by snout position
+# transform: nozzleGroup shift_by 1.5000 -40.0000 0.0000
+# rotate gantry by gantry angle
+transform: gantry rotate z 0.0000
+# translate and rotate phantom by iso position and couch rotation
+transform: phantom shift_by 0 +20 +57                                # LOOK HERE 
+transform: phantom rotate y -0.0000
+# delivery sequences for slices in field 1
+deactivate: fieldGroup #, nozzleGroup
+activate: field_1 # RS_Block
+deliver: field_1
+# reset fieldGroup, nozzleGroup and phantom to default FoR
+restore: 0
+###### setup sequence for field 2 (field name: 'Field 2')
+# translate nozzle regions by snout position
+transform: nozzleGroup shift_by 0.0000 -300.0000 0.0000
+# rotate gantry by gantry angle
+transform: gantry rotate z 90.0000
+# translate and rotate phantom by iso position and couch rotation
+#transform: phantom shift_by -3.9381 +23.8934 +57.0120
+#transform: phantom rotate y -0.0000
+# delivery sequences for slices in field 2
+#deactivate: fieldGroup
+##################################################
+###### End of setup and delivery sequence ########
+##################################################
+####################################
+###### Start of PB definition ######
+####################################
+###### PB definitions for field 1
+# spotID    fieldID           P.x           P.y           P.z             v.x           v.y           v.z        Emean     Estdev           N               pbFWHM
+pb: 1          1    	+0.0000000000 +0.0000000000 +0.0000000000   +0       +0           +1           150               1.5                       1e8               1.5

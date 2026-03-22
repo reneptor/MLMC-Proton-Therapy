@@ -1,0 +1,27 @@
+### Phantom ###
+region<
+    ID=phantom
+    CTscan='CT.mhd'
+    score = [dose]
+    lWriteCTHU = false
+    lWriteLETd_parts = false
+region>
+
+### Materials ###
+include: materials.inp
+
+### Regions ###
+include: regions.inp
+
+lTracking_nuc = false
+
+### Beam ###
+include: rtplan_single.inp
+nprim = 1e6
+
+### Physics ###
+IonizPotential=74
+
+### Control ###
+lUseInternalHU2Mat = true # use default HU calibration
+lAllowHUClamping = true # allow clamping HU values to the HU calibration range
