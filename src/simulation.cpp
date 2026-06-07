@@ -98,7 +98,9 @@ void MLMCprotons<RandomGen>::addPencilBeam(unsigned int level, float nPrimShare,
 
 template <typename RandomGen>
 void MLMCprotons<RandomGen>::simulateTreatmentPlan(unsigned int level, unsigned int numPrimaries,
-        unsigned int numThreads) {
+        unsigned int numThreads = maxThreads) {
+    assertWithMessage(numThreads <= maxThreads, "numThreads exceeded maximum available threads.");
+    
     if (level == 0) {
         if (numThreads == 1) {
             treatmentPlans[0]->simulatePlan(numPrimaries);

@@ -14,7 +14,7 @@ int main(){
 
     protonSim.addTreatmentPlan(0);
 
-    unsigned int nPrimaries = 10000;
+    unsigned int nPrimaries = 100000;
     unsigned int level = 0;
     float initialStep = 0.250050001;
     char entranceDir = 'z';
@@ -31,7 +31,7 @@ int main(){
 
     protonSim.addPencilBeam(0, 1.0, initialStep, entranceDir, beamWidth,
     dir_x, dir_y, dir_z, x_0, y_0, z_0, E, spreadE, alpha);
-    protonSim.simulateTreatmentPlan(0, 10000);
+    protonSim.simulateTreatmentPlan(0, nPrimaries);
     protonSim.renderCombinedScoringGrid();
 
     std::unique_ptr<ScoringGrid> dose = protonSim.yieldDoseCombined();

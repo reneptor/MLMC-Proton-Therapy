@@ -103,7 +103,7 @@ float computeParticleEnergiesVariance(const VarTracker* varTracker, const Grid* 
 
             float dE_diff_mean = scoringGrid->getEnergyLocal(i, j, k)/varTracker->nSamples;
             float dE_diff_sample = dE - dEs;
-            sampleSquare += (dE_diff_sample - dE_diff_sample)*(dE_diff_sample - dE_diff_sample);
+            sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
         }
         for (int index = firstIndex; index < firstIndex+secondIndex; index++){
             float dE = std::get<0>(p->next->dEhistory[index - firstIndex]);
@@ -111,7 +111,7 @@ float computeParticleEnergiesVariance(const VarTracker* varTracker, const Grid* 
             
             float dE_diff_mean = scoringGrid->getEnergyLocal(i, j, k)/varTracker->nSamples;
             float dE_diff_sample = dE - dEs;
-            sampleSquare += (dE_diff_sample - dE_diff_sample)*(dE_diff_sample - dE_diff_sample);
+            sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
         }
         sumSampleSquares += sampleSquare;
         ps = ps->next;
@@ -128,7 +128,7 @@ float computeParticleEnergiesVariance(const VarTracker* varTracker, const Grid* 
 
     while (p){
 
-        float sampleSquare = 0; // Every (particle + shadow) counts as a sample.
+        float sampleSquare = 0; // Every particle counts as a sample.
 
         unsigned int maxIndex = p->dEhistory.size();
 
@@ -137,7 +137,7 @@ float computeParticleEnergiesVariance(const VarTracker* varTracker, const Grid* 
 
             float dE_diff_mean = scoringGrid->getEnergyLocal(i, j, k)/varTracker->nSamples;
             float dE_diff_sample = dE;
-            sampleSquare += (dE_diff_sample - dE_diff_sample)*(dE_diff_sample - dE_diff_sample);
+            sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
         }
         p = p->next;
     }
