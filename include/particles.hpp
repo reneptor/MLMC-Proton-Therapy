@@ -3,6 +3,7 @@
 #include "simulation_constants.hpp"
 #include "kinematics.hpp"
 #include "voxeltraversal.hpp"
+// #include "variancetracker.hpp"
 #include "error_logging.hpp"
 #include "grids.hpp"
 
@@ -16,13 +17,14 @@ struct Particle{
     unsigned int index {};             // Particle index (for debugging)
     Particle* next = nullptr;          // Reference to next particle in history
     unsigned int particleHistoryCount {};   // Total number of particles in given history
+    float alpha {};                    // Particle shadow energy coupling strength
 
     std::vector<std::tuple<float, unsigned int, unsigned int, unsigned int>> dEhistory;  // Energy history
 
     Particle(double E, double x, double y, double z,
              double dir_x, double dir_y, double dir_z,
              double step, float effectiveRSPlength, 
-             unsigned int index, unsigned int particleHistoryCount);
+             unsigned int index, unsigned int particleHistoryCount, float alpha);
 };
 
 
@@ -49,15 +51,15 @@ void deleteParticleHistory(P* p);
 
 
 template <typename Grid>
-void depositParticleEnergiesMean(Grid* meanScoringGrid, Particle* p, ParticleShadow* ps);
+void depositParticleEnergies(Grid* meanScoringGrid, Particle* p, ParticleShadow* ps);
 
 
-template <typename VarTracker, typename Grid>
-float computeParticleEnergiesVariance(const VarTracker* varTracker, const Grid* scoringGrid, Particle* p, ParticleShadow* ps);
+// template <typename Grid>
+// float computeParticleEnergiesVariance(const VarianceTracker* varTracker, const Grid* scoringGrid, Particle* p, ParticleShadow* ps);
 
 
-template <typename VarTracker, typename Grid>
-float computeParticleEnergiesVariance(const VarTracker* varTracker, const Grid* scoringGrid, Particle* p);
+// template <typename Grid>
+// float computeParticleEnergiesVariance(const VarianceTracker* varTracker, const Grid* scoringGrid, Particle* p);
 
 
 template <typename Grid, typename RandomGen>
@@ -65,7 +67,7 @@ void generateParticleHistory(const Grid* mediumGrid, Particle* initial, RandomGe
 
 
 template <typename Grid, typename RandomGen>
-void generateParticleShadowHistory(const Grid* mediumGrid, Particle* initial, ParticleShadow* initialShadow, RandomGen& gen, float alpha);
+void generateParticleShadowHistory(const Grid* mediumGrid, Particle* initial, ParticleShadow* initialShadow, RandomGen& gen);
 
 
 template <typename Grid, typename RandomGen>
@@ -73,7 +75,7 @@ Particle* particleStep(const Grid* mediumGrid, const Particle* p, RandomGen& gen
 
 
 template <typename Grid, typename RandomGen>
-ParticleShadow* particleShadowStep(const Grid* mediumGrid, const Particle* p_prev, const Particle* p, const Particle* p_next, const ParticleShadow* ps_prev, RandomGen& gen, float alpha);
+ParticleShadow* particleShadowStep(const Grid* mediumGrid, const Particle* p_prev, const Particle* p, const Particle* p_next, const ParticleShadow* ps_prev, RandomGen& gen);
 
 
 // template <typename Grid, typename RandomGen>

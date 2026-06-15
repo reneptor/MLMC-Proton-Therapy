@@ -5,28 +5,18 @@ namespace cc = control_constants;
 namespace gc = grid_constants;
 
 
-// template void generateParticleHistory<MediumGrid, std::mt19937>(MediumGrid*, Particle*, std::mt19937&);
-// template void generateParticleShadowHistory<MediumGrid, std::mt19937>(MediumGrid*, Particle*, ParticleShadow*, std::mt19937&);
-
-// template void generateParticleHistory<MediumGrid, std::mt19937>(const MediumGrid*, Particle*, std::mt19937&);
-// template void generateParticleShadowHistory<MediumGrid, std::mt19937>(const MediumGrid*, Particle*, ParticleShadow*, std::mt19937&, float);
-// template void depositParticleEnergy<ScoringGrid, Particle>(ScoringGrid*, Particle*);
-// template void depositParticleEnergy<ScoringGrid, ParticleShadow>(ScoringGrid*, ParticleShadow*);
-// template void deleteParticleHistory<Particle>(Particle*);
-// template void deleteParticleHistory<ParticleShadow>(ParticleShadow*);
-
-
 Particle::Particle(double E, double x, double y, double z,
             double dir_x, double dir_y, double dir_z,
             double step,
             float effectiveRSPlength,
             unsigned int index, 
-            unsigned int particleHistoryCount)
+            unsigned int particleHistoryCount,
+            float alpha)
     : E(E), 
         x(x), y(y), z(z),
         dir_x(dir_x), dir_y(dir_y), dir_z(dir_z),
         step(step), effectiveRSPlength(effectiveRSPlength),
-        index(index), particleHistoryCount(particleHistoryCount) {}
+        index(index), particleHistoryCount(particleHistoryCount), alpha(alpha) {}
 
 
 ParticleShadow::ParticleShadow(double E, unsigned int index) 
@@ -43,6 +33,7 @@ void addEnergyHistory(P* p, double dE, double totalLength, const Segs& segments)
 
 template <typename Grid, typename P>
 void depositParticleEnergy(Grid* scoringGrid, P* p){
+    scoringGrid->addSample();
     while (p){
         for (auto [dE, i, j, k] : p->dEhistory){
             scoringGrid->depositEnergyLocal(i, j, k, dE);
@@ -63,7 +54,8 @@ void deleteParticleHistory(P* p){
 
 
 template <typename Grid>
-void depositParticleEnergiesMean(Grid* scoringGrid, Particle* p, ParticleShadow* ps){
+void depositParticleEnergies(Grid* scoringGrid, Particle* p, ParticleShadow* ps){
+    scoringGrid->addSample();
     while (ps){
 
         unsigned int firstIndex = p->dEhistory.size();
@@ -85,64 +77,64 @@ void depositParticleEnergiesMean(Grid* scoringGrid, Particle* p, ParticleShadow*
 }
 
 
-template <typename VarTracker, typename Grid>
-float computeParticleEnergiesVariance(const VarTracker* varTracker, const Grid* scoringGrid, Particle* p, ParticleShadow* ps){
+// template <typename Grid>
+// float computeParticleEnergiesVariance(const VarianceTracker* varTracker, const Grid* scoringGrid, Particle* p, ParticleShadow* ps){
 
-    float sumSampleSquares = 0;
+//     float sumSampleSquares = 0;
 
-    while (ps){
+//     while (ps){
 
-        float sampleSquare = 0; // Every (particle + shadow) counts as a sample.
+//         float sampleSquare = 0; // Every (particle + shadow) counts as a sample.
 
-        unsigned int firstIndex = p->dEhistory.size();
-        unsigned int secondIndex = p->next->dEhistory.size();
+//         unsigned int firstIndex = p->dEhistory.size();
+//         unsigned int secondIndex = p->next->dEhistory.size();
 
-        for (int index = 0; index < firstIndex; index++){
-            float dE = std::get<0>(p->dEhistory[index]); 
-            const auto [dEs, i, j, k] = ps->dEhistory[index];
+//         for (int index = 0; index < firstIndex; index++){
+//             float dE = std::get<0>(p->dEhistory[index]); 
+//             const auto [dEs, i, j, k] = ps->dEhistory[index];
 
-            float dE_diff_mean = scoringGrid->getEnergyLocal(i, j, k)/varTracker->nSamples;
-            float dE_diff_sample = dE - dEs;
-            sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
-        }
-        for (int index = firstIndex; index < firstIndex+secondIndex; index++){
-            float dE = std::get<0>(p->next->dEhistory[index - firstIndex]);
-            const auto [dEs, i, j, k] = ps->dEhistory[index];
+//             float dE_diff_mean = scoringGrid->getVoxel(i, j, k)/varTracker->nSamples;
+//             float dE_diff_sample = dE - dEs;
+//             sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
+//         }
+//         for (int index = firstIndex; index < firstIndex+secondIndex; index++){
+//             float dE = std::get<0>(p->next->dEhistory[index - firstIndex]);
+//             const auto [dEs, i, j, k] = ps->dEhistory[index];
             
-            float dE_diff_mean = scoringGrid->getEnergyLocal(i, j, k)/varTracker->nSamples;
-            float dE_diff_sample = dE - dEs;
-            sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
-        }
-        sumSampleSquares += sampleSquare;
-        ps = ps->next;
-        p = p->next->next;
-    }
-    return sumSampleSquares;
-}
+//             float dE_diff_mean = scoringGrid->getVoxel(i, j, k)/varTracker->nSamples;
+//             float dE_diff_sample = dE - dEs;
+//             sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
+//         }
+//         sumSampleSquares += sampleSquare;
+//         ps = ps->next;
+//         p = p->next->next;
+//     }
+//     return sumSampleSquares;
+// }
 
 
-template <typename VarTracker, typename Grid>
-float computeParticleEnergiesVariance(const VarTracker* varTracker, const Grid* scoringGrid, Particle* p){
+// template <typename Grid>
+// float computeParticleEnergiesVariance(const VarianceTracker* varTracker, const Grid* scoringGrid, Particle* p){
 
-    float sumSampleSquares = 0;
+//     float sumSampleSquares = 0;
 
-    while (p){
+//     while (p){
 
-        float sampleSquare = 0; // Every particle counts as a sample.
+//         float sampleSquare = 0; // Every particle counts as a sample.
 
-        unsigned int maxIndex = p->dEhistory.size();
+//         unsigned int maxIndex = p->dEhistory.size();
 
-        for (int index = 0; index < maxIndex; index++){
-            const auto [dE, i, j, k] = p->dEhistory[index];
+//         for (int index = 0; index < maxIndex; index++){
+//             const auto [dE, i, j, k] = p->dEhistory[index];
 
-            float dE_diff_mean = scoringGrid->getEnergyLocal(i, j, k)/varTracker->nSamples;
-            float dE_diff_sample = dE;
-            sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
-        }
-        p = p->next;
-    }
-    return sumSampleSquares;
-}
+//             float dE_diff_mean = scoringGrid->getVoxel(i, j, k)/varTracker->nSamples;
+//             float dE_diff_sample = dE;
+//             sampleSquare += (dE_diff_sample - dE_diff_mean)*(dE_diff_sample - dE_diff_mean);
+//         }
+//         p = p->next;
+//     }
+//     return sumSampleSquares;
+// }
 
 
 
@@ -163,12 +155,12 @@ void generateParticleHistory(const Grid* mediumGrid, Particle* initial, RandomGe
 
 
 template <typename Grid, typename RandomGen>
-void generateParticleShadowHistory(const Grid* mediumGrid, Particle* initial, ParticleShadow* initialShadow, RandomGen& gen, float alpha){
+void generateParticleShadowHistory(const Grid* mediumGrid, Particle* initial, ParticleShadow* initialShadow, RandomGen& gen){
     Particle* p = initial;
     ParticleShadow* ps = initialShadow; // This particle responsible for complete history
     while (p->next && p->next->next){
 
-        ParticleShadow* ps_next = particleShadowStep<Grid, RandomGen>(mediumGrid, p, p->next, p->next->next, ps, gen, alpha);
+        ParticleShadow* ps_next = particleShadowStep<Grid, RandomGen>(mediumGrid, p, p->next, p->next->next, ps, gen);
         ps->next = ps_next;
         ps = ps_next;
         p = p->next->next;
@@ -212,7 +204,8 @@ Particle* particleStep(const Grid* mediumGrid, const Particle* p, RandomGen& gen
         step_next,              // 
         effectiveRSPlength,     // All used for shadow particle calculations  
         p->index,
-        p->particleHistoryCount+1
+        p->particleHistoryCount+1,
+        p->alpha
     );
 
     addEnergyHistory<Particle, std::vector<LineSegment>>(p_next, dE, step_next, segments);
@@ -221,11 +214,10 @@ Particle* particleStep(const Grid* mediumGrid, const Particle* p, RandomGen& gen
 
 
 template <typename Grid, typename RandomGen>
-ParticleShadow* particleShadowStep(const Grid* mediumGrid, const Particle* p_prev, Particle* p, Particle* p_next, const ParticleShadow* ps_prev, RandomGen& gen,
-    float alpha){
+ParticleShadow* particleShadowStep(const Grid* mediumGrid, const Particle* p_prev, Particle* p, Particle* p_next, const ParticleShadow* ps_prev, RandomGen& gen){
 
     float effectiveRSPlengthTotal = p->effectiveRSPlength + p_next->effectiveRSPlength;
-    double dE = sampleEnergyLoss<RandomGen>(effectiveRSPlengthTotal, ps_prev->E, gen, p_prev->E, alpha);
+    double dE = sampleEnergyLoss<RandomGen>(effectiveRSPlengthTotal, ps_prev->E, gen, p_prev->E, p->alpha);
     double E = ps_prev->E - dE;
 
     ParticleShadow* ps = new ParticleShadow(E, ps_prev->index);
@@ -247,6 +239,19 @@ ParticleShadow* particleShadowStep(const Grid* mediumGrid, const Particle* p_pre
 
     return ps;
 }
+
+
+
+template void generateParticleHistory<MediumGrid, std::mt19937>(const MediumGrid*, Particle*, std::mt19937&);
+template void generateParticleShadowHistory<MediumGrid, std::mt19937>(const MediumGrid*, Particle*, ParticleShadow*, std::mt19937&);
+template void depositParticleEnergy<ScoringGrid, Particle>(ScoringGrid*, Particle*);
+template void depositParticleEnergy<ScoringGrid, ParticleShadow>(ScoringGrid*, ParticleShadow*);
+template void deleteParticleHistory<Particle>(Particle*);
+template void deleteParticleHistory<ParticleShadow>(ParticleShadow*);
+
+template void depositParticleEnergies<ScoringGrid>(ScoringGrid*, Particle*, ParticleShadow*);
+// template float computeParticleEnergiesVariance<ScoringGrid>(const VarianceTracker*, const ScoringGrid*, Particle*, ParticleShadow*);
+// template float computeParticleEnergiesVariance<ScoringGrid>(const VarianceTracker*, const ScoringGrid*, Particle*);
 
 // template <typename Grid, typename RandomGen>
 // ParticleShadow* particleShadowStep(const Grid* mediumGrid, const Particle* p, const ParticleShadow* ps, RandomGen& gen,

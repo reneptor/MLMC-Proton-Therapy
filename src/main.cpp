@@ -14,9 +14,9 @@ int main(){
 
     protonSim.addTreatmentPlan(0);
 
-    unsigned int nPrimaries = 100000;
+    unsigned int nPrimaries = 1000;
     unsigned int level = 0;
-    float initialStep = 0.250050001;
+    float initialStep = 2.0050001;
     char entranceDir = 'z';
     float beamWidth = 3.0;
     double dir_x = 0.0;
@@ -31,7 +31,7 @@ int main(){
 
     protonSim.addPencilBeam(0, 1.0, initialStep, entranceDir, beamWidth,
     dir_x, dir_y, dir_z, x_0, y_0, z_0, E, spreadE, alpha);
-    protonSim.simulateTreatmentPlan(0, nPrimaries);
+    protonSim.simulateTreatmentPlan(0, nPrimaries, 1);
     protonSim.renderCombinedScoringGrid();
 
     std::unique_ptr<ScoringGrid> dose = protonSim.yieldDoseCombined();
@@ -40,3 +40,8 @@ int main(){
     
     return 0;
 }
+
+
+
+template struct MLMCprotons<std::mt19937>;
+

@@ -4,12 +4,6 @@
 namespace pc = physics_constants;
 
 
-template float effectiveRSPlengthFromMedium<MediumGrid, std::vector<LineSegment>>(const MediumGrid*, const std::vector<LineSegment>&);
-template float effectiveRMSangleFromMedium<MediumGrid, std::vector<LineSegment>>(const MediumGrid*, const std::vector<LineSegment>&);
-// template double sampleEnergyLoss<std::mt19937>(double, double, std::mt19937&, double, float);
-// template std::array<double, 3> sampleDir<std::mt19937>(float, double, double, double, double, std::mt19937&);
-
-
 template<typename Grid, typename Segs>
 float effectiveRSPlengthFromMedium(const Grid* mediumGrid, const Segs& segments){
     float RSPlength = 0;
@@ -175,3 +169,9 @@ double sampleEnergyLoss(double RSPlength, double E, RandomGen& gen, double E_rea
     double dEsample = distEnergyLoss(gen);
     return dEsample;
 }       
+
+
+template float effectiveRSPlengthFromMedium<MediumGrid, std::vector<LineSegment>>(const MediumGrid*, const std::vector<LineSegment>&);
+template float effectiveRMSangleFromMedium<MediumGrid, std::vector<LineSegment>>(const MediumGrid*, const std::vector<LineSegment>&);
+template double sampleEnergyLoss<std::mt19937>(double, double, std::mt19937&, double, float);
+template std::array<double, 3> sampleDir<std::mt19937>(float, double, double, double, double, std::mt19937&);

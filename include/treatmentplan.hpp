@@ -3,30 +3,22 @@
 #include "grids.hpp"
 #include "pencilbeam.hpp"
 #include "particles.hpp"
+// #include "variancetracker.hpp"
+#include "simulation_constants.hpp"
 #include <random>
 #include <vector>
 #include <random>
 #include "error_logging.hpp"
 
 
-struct VarianceTracker{
-    unsigned int nSamples {};
-    float sumSampleSquares {};
-
-    VarianceTracker();
-    void addSamples(unsigned int n);
-    void incrementSum(float sampleSquare);
-    float getVariance();
-};
-
-
 template <typename RandomGen>
 struct TreatmentPlan {
 
     unsigned int level;
-    MediumGrid* mediumGrid;
+    const MediumGrid* mediumGrid;
     ScoringGrid* scoringGrid;
-    VarianceTracker* varTracker;
+    // VarianceTracker* varTracker;
+    RandomGen gen;
     unsigned int nBeams {};
     std::vector<PencilBeam<RandomGen>*> pencilBeams;
     std::vector<float> shareParticlesPerBeam;
@@ -34,7 +26,7 @@ struct TreatmentPlan {
     Particle** particleHistories {};
     ParticleShadow** particleShadowHistories {};
 
-    TreatmentPlan(unsigned int level, MediumGrid* mediumGrid);
+    TreatmentPlan(unsigned int level, const MediumGrid* mediumGrid, RandomGen gen);
     ~TreatmentPlan();
     void addPencilBeam(float nPrimShare, double initialStep,
     char entranceDir, float beamWidth, double dir_x, double dir_y, double dir_z, 

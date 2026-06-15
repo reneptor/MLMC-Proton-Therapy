@@ -39,6 +39,8 @@ struct MLMCprotons {
     void simulateTreatmentPlan(unsigned int level, unsigned int numPrimaries, unsigned int numThreads = maxThreads);
     void renderCombinedScoringGrid();
     std::unique_ptr<ScoringGrid> yieldDoseAtLevel(unsigned int level);
+    std::unique_ptr<ScoringGrid> yieldDoseVarianceAtLevel(unsigned int level);
+    float yieldTotalDoseVarianceAtLevel(unsigned int level);
     std::unique_ptr<ScoringGrid> yieldDoseCombined();
 
 };

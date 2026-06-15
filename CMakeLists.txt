@@ -30,6 +30,7 @@ set(COMMON_SOURCES
     "${SOURCE_DIR}/pencilbeam.cpp"
     "${SOURCE_DIR}/simulation.cpp"
     "${SOURCE_DIR}/voxeltraversal.cpp"
+    "${SOURCE_DIR}/treatmentplan.cpp"
 )
 
 # Header files (not strictly needed in targets)
@@ -44,6 +45,7 @@ set(HEADERS
     "${INCLUDE_DIR}/pencilbeam.hpp"
     "${INCLUDE_DIR}/simulation.hpp"
     "${INCLUDE_DIR}/voxeltraversal.hpp"
+    "${INCLUDE_DIR}/treatmentplan.hpp"
 )
 
 # -------------------

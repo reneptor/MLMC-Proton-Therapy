@@ -39,8 +39,16 @@ PYBIND11_MODULE(mlmcprotons, m) {
              py::arg("level"),
              "Return a ScoringGrid (dose) at the specified level.")
 
+        .def("yieldDoseVarianceAtLevel", &MLMCprotons<std::mt19937>::yieldDoseVarianceAtLevel,
+             py::arg("level"),
+             "Return a variance ScoringGrid (dose) at the specified level.")
+
+        .def("yieldTotalDoseVarianceAtLevel", &MLMCprotons<std::mt19937>::yieldTotalDoseVarianceAtLevel,
+             py::arg("level"),
+             "Return total variance (dose) at the specified level.")
+
         .def("yieldDoseCombined", &MLMCprotons<std::mt19937>::yieldDoseCombined,
-             "Return the combined dose ScoringGrid.");
+            "Return the combined dose ScoringGrid.");
 
     py::class_<ScoringGrid>(m, "Dose")
         .def(py::init<unsigned int, size_t, size_t, size_t>(),

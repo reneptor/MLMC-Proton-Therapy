@@ -50,7 +50,6 @@ constexpr float DIR_X = 0.0;
 constexpr float DIR_Y = 0.0;
 constexpr float DIR_Z = 1.0;
 constexpr float ALPHA = 1.0;
-
 }
 
 

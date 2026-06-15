@@ -1,9 +1,6 @@
 #include "simulation.hpp"
 
 
-template struct MLMCprotons<std::mt19937>;
-
-
 
 template <typename RandomGen>
 const unsigned int MLMCprotons<RandomGen>::maxThreads = std::thread::hardware_concurrency();
@@ -13,6 +10,7 @@ template <typename RandomGen>
 MLMCprotons<RandomGen>::MLMCprotons(unsigned int seed, const std::string tablePath) : hu2mat(tablePath), gen(seed) {
     mediumGrid = new MediumGrid(&hu2mat);
     combinedScoringGrid = new ScoringGrid(0);
+    combinedScoringGrid->assignMediumGrid(mediumGrid);
 }
 
 
@@ -78,7 +76,7 @@ void MLMCprotons<RandomGen>::loadPhantom(const std::string phantomPath, size_t n
 
 template <typename RandomGen>
 void MLMCprotons<RandomGen>::addTreatmentPlan(unsigned int level){
-    treatmentPlans[level] = new TreatmentPlan<RandomGen>(level, mediumGrid);
+    treatmentPlans[level] = new TreatmentPlan<RandomGen>(level, mediumGrid, gen);
 }
 
 
@@ -98,7 +96,7 @@ void MLMCprotons<RandomGen>::addPencilBeam(unsigned int level, float nPrimShare,
 
 template <typename RandomGen>
 void MLMCprotons<RandomGen>::simulateTreatmentPlan(unsigned int level, unsigned int numPrimaries,
-        unsigned int numThreads = maxThreads) {
+        unsigned int numThreads) {
     assertWithMessage(numThreads <= maxThreads, "numThreads exceeded maximum available threads.");
     
     if (level == 0) {
@@ -123,17 +121,31 @@ void MLMCprotons<RandomGen>::simulateTreatmentPlan(unsigned int level, unsigned 
 template <typename RandomGen>
 std::unique_ptr<ScoringGrid> MLMCprotons<RandomGen>::yieldDoseAtLevel(unsigned int level) {
     // assertWithMessage(index < scoringGrids.size(), "Grid index out of bounds");
-    std::unique_ptr<ScoringGrid> doseAtLevel = treatmentPlans[level]->scoringGrid->convertToDose(mediumGrid);
+    std::unique_ptr<ScoringGrid> doseAtLevel = treatmentPlans[level]->scoringGrid->getDose();
     return doseAtLevel;
 }
 
 
 template <typename RandomGen>
-std::unique_ptr<ScoringGrid> MLMCprotons<RandomGen>::yieldDoseCombined() {
-    std::unique_ptr<ScoringGrid> doseCombined = combinedScoringGrid->convertToDose(mediumGrid);
-    return doseCombined;
+std::unique_ptr<ScoringGrid> MLMCprotons<RandomGen>::yieldDoseVarianceAtLevel(unsigned int level) {
+    // assertWithMessage(index < scoringGrids.size(), "Grid index out of bounds");
+    std::unique_ptr<ScoringGrid> doseAtLevel = treatmentPlans[level]->scoringGrid->getDoseVariance();
+    return doseAtLevel;
 }
 
 
+template <typename RandomGen>
+float MLMCprotons<RandomGen>::yieldTotalDoseVarianceAtLevel(unsigned int level) {
+    // assertWithMessage(index < scoringGrids.size(), "Grid index out of bounds");
+    float totalDoseVariance = treatmentPlans[level]->scoringGrid->getTotalDoseVariance();
+    return totalDoseVariance;
+}
 
 
+template <typename RandomGen>
+std::unique_ptr<ScoringGrid> MLMCprotons<RandomGen>::yieldDoseCombined() {
+    std::unique_ptr<ScoringGrid> doseCombined = combinedScoringGrid->getDose();
+    return doseCombined;
+}
+
+template struct MLMCprotons<std::mt19937>;
